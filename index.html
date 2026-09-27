@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karunad Yatra | Karnataka Tourism</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">KY</div>
+    <div><strong>Karunad Yatra</strong><small>Explore Karnataka</small></div>
+  </div>
+  <nav>
+    <a href="/index.html">Home</a>
+    <a href="/destinations.html">Destinations</a>
+    <a href="/planner.html">Trip Planner</a>
+  </nav>
+  <button class="btn" onclick="openLogin()">Login</button>
+</header>
+
+<main>
+<section id="home" class="hero">
+  <div>
+    <span class="badge">ONE PLATFORM • KARNATAKA</span>
+    <h1>Discover the beauty of <span>Karnataka</span></h1>
+    <p>Places • Culture • Food • Maps • Weather • Transport • Trip Planning</p>
+    <div class="searchbar">
+      <input id="searchInput" placeholder="Search destinations...">
+      <button class="btn" onclick="globalSearch()">Search</button>
+    </div>
+  </div>
+</section>
+
+<section class="section feature-grid">
+  <div class="feature">🏨 <b>Hotels</b><span>Open any destination to see hotels nearby it.</span></div>
+  <div class="feature">🍛 <b>Local Food</b><span>Discover regional restaurants right on the destination page.</span></div>
+  <div class="feature">🎭 <b>Culture & Festivals</b><span>Explore Karnataka's traditions and events.</span></div>
+  <div class="feature">🚌 <b>Transport</b><span>Show routes, nearby transport and travel tips.</span></div>
+  <div class="feature">☁️ <b>Weather</b><span>Ready for a live weather API connection.</span></div>
+  <div class="feature">🤖 <b>AI Travel Assistant</b><span>Ask for destination and itinerary suggestions.</span></div>
+  <div class="feature">🚦 <b>Crowd Indicator</b><span>Highlights crowded destinations and suggests alternatives.</span></div>
+  <div class="feature">🗺️ <b>Trip Planner</b><span>Pick destinations and get a day-by-day itinerary with costs.</span></div>
+</section>
+
+</main>
+
+<div id="loginModal" class="modal">
+  <div class="modal-box">
+    <button class="close" onclick="closeLogin()">×</button>
+    <h2>Welcome to Karunad Yatra</h2>
+    <input id="loginName" placeholder="Your name">
+    <input id="loginEmail" type="email" placeholder="Email">
+    <button class="btn full" onclick="login()">Continue</button>
+    <p id="loginMsg"></p>
+  </div>
+</div>
+
+<div id="chatModal" class="modal">
+  <div class="modal-box">
+    <button class="close" onclick="closeChat()">×</button>
+    <h2>Chatbot</h2>
+    <div id="chatHistory" style="height:200px; overflow-y:auto; background:#f5f8f7; padding:10px; border-radius:10px; margin-bottom:10px;">
+      <p><b>Bot:</b> Hello! Ask me about Karnataka tourism.</p>
+    </div>
+    <input id="chatInput" placeholder="Type a message...">
+    <button class="btn full" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<button class="btn" style="position:fixed; bottom:20px; right:20px; border-radius:50%; width:60px; height:60px; font-size:24px; box-shadow:0 4px 10px rgba(0,0,0,0.3);" onclick="openChat()">💬</button>
+
+<script src="js/common.js"></script>
+</body>
+</html>

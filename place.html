@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Destination | Karunad Yatra</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">KY</div>
+    <div><strong>Karunad Yatra</strong><small>Explore Karnataka</small></div>
+  </div>
+  <nav>
+    <a href="/index.html">Home</a>
+    <a href="/destinations.html">Destinations</a>
+    <a href="/planner.html">Trip Planner</a>
+  </nav>
+  <button class="btn" onclick="openLogin()">Login</button>
+</header>
+
+<main>
+<section class="section two-col">
+  <div id="placeDetails">
+    Loading...
+  </div>
+  <div id="map"></div>
+</section>
+
+<section class="section">
+  <div class="section-title">
+    <div><span class="eyebrow">STAY</span><h2>Hotels near this destination</h2></div>
+  </div>
+  <div id="hotelGrid" class="grid">Loading...</div>
+</section>
+
+<section class="section">
+  <div class="section-title">
+    <div><span class="eyebrow">DINE</span><h2>Restaurants near this destination</h2></div>
+  </div>
+  <div id="restaurantGrid" class="grid">Loading...</div>
+</section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/common.js"></script>
+<script>
+  let map, marker;
+
+  function initMap(lat, lng, name){
+    map = L.map("map").setView([lat, lng], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {attribution:"© OpenStreetMap contributors"}).addTo(map);
+    marker = L.marker([lat, lng]).addTo(map).bindPopup(`<b>${name}</b>`).openPopup();
+  }
+
+  function openMaps(lat,lng){ window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank"); }
+
+  async function loadPlace() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    if(!id) return;
+
+    try {
+      const p = await api(`/api/places/${id}`);
+      let crowdHtml = `<div class="crowd" id="crowdBox"><b>🚦 Crowd indicator: N/A</b></div>`;
+      try {
+        const c = await api(`/api/crowd/${id}`);
+        crowdHtml = `<div class="crowd" id="crowdBox"><b>🚦 Crowd indicator: ${c.crowd_level}</b><br>Estimated visitors: ${c.estimated_count}</div>`;
+      } catch(e) {}
+
+      document.getElementById("placeDetails").innerHTML = `
+        <span class="eyebrow">${p.category}</span>
+        <h2>${p.name}</h2>
+        <p>${p.description || ""}</p>
+        ${crowdHtml}
+        <div class="detail-list">
+          <div><b>District</b><br>${p.district}</div>
+          <div><b>Best time</b><br>${p.best_time}</div>
+          <div><b>Duration</b><br>${p.duration}</div>
+          <div><b>Coordinates</b><br>${p.latitude}, ${p.longitude}</div>
+        </div>
+        <br>
+        <button class="btn primary" onclick="openMaps(${p.latitude},${p.longitude})">Open in Google Maps</button>
+      `;
+      initMap(p.latitude, p.longitude, p.name);
+
+      loadNearby(id);
+    } catch (e) {
+      document.getElementById("placeDetails").innerHTML = `<p>Error loading destination details.</p>`;
+    }
+  }
+
+  async function loadNearby(id) {
+    try {
+      const hotels = await api(`/api/hotels/destination/${id}`);
+      document.getElementById("hotelGrid").innerHTML = hotels.length === 0
+        ? `<p>No nearby hotels found.</p>`
+        : hotels.map(h => `
+          <article class="card">
+            <div class="card-top" style="height:100px;"><h3>${h.name}</h3></div>
+            <div class="card-body">
+              <div class="muted">${h.hotel_type}</div>
+              <p>⭐ ${h.rating} | ₹${h.price_range}</p>
+              <div class="tags"><span class="tag">${(h.facilities||"").split(',').slice(0,3).join('</span><span class="tag">')}</span></div>
+              <div class="actions">
+                <button class="primary" onclick="openMaps(${h.latitude},${h.longitude})">Open in Google Maps</button>
+              </div>
+            </div>
+          </article>`).join("");
+    } catch(e) {
+      document.getElementById("hotelGrid").innerHTML = `<p>Error loading hotels.</p>`;
+    }
+
+    try {
+      const restaurants = await api(`/api/restaurants/destination/${id}`);
+      document.getElementById("restaurantGrid").innerHTML = restaurants.length === 0
+        ? `<p>No nearby restaurants found.</p>`
+        : restaurants.map(r => `
+          <article class="card">
+            <div class="card-top" style="height:100px;"><h3>${r.name}</h3></div>
+            <div class="card-body">
+              <div class="muted">${r.cuisine}</div>
+              <p>⭐ ${r.rating} | ₹${r.price_range}</p>
+              <p>Hours: ${r.opening_hours}</p>
+              <div class="actions">
+                <button class="primary" onclick="openMaps(${r.latitude},${r.longitude})">Open in Google Maps</button>
+              </div>
+            </div>
+          </article>`).join("");
+    } catch(e) {
+      document.getElementById("restaurantGrid").innerHTML = `<p>Error loading restaurants.</p>`;
+    }
+  }
+
+  loadPlace();
+</script>
+</body>
+</html>

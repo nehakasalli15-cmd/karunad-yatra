@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trip Planner | Karunad Yatra</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">KY</div>
+    <div><strong>Karunad Yatra</strong><small>Explore Karnataka</small></div>
+  </div>
+  <nav>
+    <a href="/index.html">Home</a>
+    <a href="/destinations.html">Destinations</a>
+    <a href="/planner.html">Trip Planner</a>
+  </nav>
+  <button class="btn" onclick="openLogin()">Login</button>
+</header>
+
+<main>
+<section class="section planner">
+  <span class="eyebrow">SMART PLANNING</span>
+  <h2>Build your Karnataka trip</h2>
+  <p>Select the destinations you want to visit, tell us your days and budget, and we'll build a day-by-day plan — including nearby hotels and restaurants and an estimated cost per person.</p>
+
+  <div class="planner-form" style="margin-top: 20px;">
+    <label style="flex: 1; min-width: 250px;">
+      Select Destination
+      <select id="placeSelect" style="padding:11px; border:1px solid #dfe5eb; border-radius:9px;">
+        <option value="">Loading...</option>
+      </select>
+    </label>
+    <button class="btn" onclick="addSelectedPlace()">Add to Trip</button>
+  </div>
+
+  <div id="selectedPlaces" class="selected" style="margin-top: 20px;"></div>
+
+  <div class="planner-form" style="margin-top: 20px; border-top: 1px solid #e8edf3; padding-top: 20px;">
+    <label>Days <input id="days" type="number" min="1" max="30" value="2"></label>
+    <label>Budget per person (₹) <input id="budget" type="number" min="500" value="5000"></label>
+    <button class="btn" onclick="makePlan()" style="margin-left: auto;">Generate Itinerary</button>
+  </div>
+
+  <div id="planResult" style="margin-top: 30px;"></div>
+</section>
+</main>
+
+<script src="js/common.js"></script>
+<script>
+  let allPlaces = [];
+  let selectedPlaceIds = new Set();
+
+  async function loadPlacesDropdown() {
+    try {
+      allPlaces = await api("/api/places");
+      const select = document.getElementById("placeSelect");
+      select.innerHTML = `<option value="">-- Choose a destination --</option>` +
+        allPlaces.map(p => `<option value="${p.id}">${p.name} (${p.district})</option>`).join("");
+    } catch(e) {
+      document.getElementById("placeSelect").innerHTML = `<option value="">Error loading places</option>`;
+    }
+  }
+
+  function addSelectedPlace() {
+    const id = document.getElementById("placeSelect").value;
+    if(!id) return;
+    selectedPlaceIds.add(id);
+    updateSelectedPlacesUI();
+  }
+
+  function removePlace(id) {
+    selectedPlaceIds.delete(id);
+    updateSelectedPlacesUI();
+  }
+
+  function updateSelectedPlacesUI() {
+    const box = document.getElementById("selectedPlaces");
+    if(selectedPlaceIds.size === 0) {
+      box.innerHTML = `<p class="muted">No destinations added yet.</p>`;
+      return;
+    }
+
+    box.innerHTML = [...selectedPlaceIds].map(id => {
+      const p = allPlaces.find(x => x.id == id);
+      if(!p) return "";
+      return `<button onclick="removePlace('${id}')">${p.name} ×</button>`;
+    }).join("");
+  }
+
+  function renderStop(s) {
+    if (!s) return '';
+    const activities = Array.isArray(s.activities) ? s.activities : [];
+    return `
+      <div class="stop-card">
+        <b>${s.name||''}</b> <span class="muted">${s.district && s.district !== '-' ? s.district + ' • ' : ''}${s.category||''}</span>
+        <p>${activities.join(' • ')}</p>
+        ${s.suggested_hotel ? `<span class="tag">Hotel: ${s.suggested_hotel.name} (⭐${s.suggested_hotel.rating} · ₹${s.suggested_hotel.price_range})</span>` : ''}
+        ${s.suggested_restaurant ? `<span class="tag">Food: ${s.suggested_restaurant.name} (⭐${s.suggested_restaurant.rating} · ₹${s.suggested_restaurant.price_range})</span>` : ''}
+      </div>`;
+  }
+
+  async function makePlan() {
+    const result = document.getElementById("planResult");
+    if (selectedPlaceIds.size === 0) {
+      result.innerHTML = `<p style="color:red;">Please select at least one destination.</p>`;
+      return;
+    }
+
+    result.innerHTML = `<p class="muted">Building your itinerary...</p>`;
+
+    let data;
+    try {
+      data = await api("/api/trip-plan", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          placeIds: [...selectedPlaceIds],
+          days: Number(document.getElementById("days").value),
+          budget: Number(document.getElementById("budget").value)
+        })
+      });
+    } catch(e) {
+      result.innerHTML = `<p style="color:red;">${e.message}</p>`;
+      return;
+    }
+
+    // Defensive: tolerate an older/partial server response instead of
+    // crashing with "Cannot read properties of undefined".
+    if (!data || !Array.isArray(data.itinerary)) {
+      result.innerHTML = `<p style="color:red;">The server didn't return a valid itinerary. Make sure server.js was updated and the server was restarted.</p>`;
+      return;
+    }
+    const cost = data.costBreakdown || { hotel: 0, food: 0, misc: 0 };
+    const total = data.estimatedCostPerPerson ?? (cost.hotel + cost.food + cost.misc);
+    const withinBudget = total <= (data.budget ?? Infinity);
+
+    try {
+      result.innerHTML = `
+        <div class="cost-summary">
+          <div>Hotels<b>₹${(cost.hotel||0).toLocaleString()}</b></div>
+          <div>Food<b>₹${(cost.food||0).toLocaleString()}</b></div>
+          <div>Transport & misc<b>₹${(cost.misc||0).toLocaleString()}</b></div>
+          <div>Total per person<b>₹${total.toLocaleString()}</b></div>
+        </div>
+        <div class="budget-note ${withinBudget ? 'ok' : ''}">${data.budgetNote || ''}</div>
+        ${data.itinerary.map(day => `
+          <div class="plan-day">
+            <h3>Day ${day.day}</h3>
+            ${(day.stops||[]).map(renderStop).join("")}
+          </div>`).join("")}
+        <p class="muted">${data.note || ''}</p>
+      `;
+    } catch(e) {
+      result.innerHTML = `<p style="color:red;">Couldn't render the itinerary (${e.message}).</p>`;
+    }
+  }
+
+  loadPlacesDropdown();
+  updateSelectedPlacesUI();
+</script>
+</body>
+</html>

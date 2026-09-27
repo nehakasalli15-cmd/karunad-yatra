@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurants | Karunad Yatra</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">KY</div>
+    <div><strong>Karunad Yatra</strong><small>Explore Karnataka</small></div>
+  </div>
+  <nav>
+    <a href="/index.html">Home</a>
+    <a href="/destinations.html">Destinations</a>
+    <a href="/hotels.html">Hotels</a>
+    <a href="/restaurants.html">Restaurants</a>
+    <a href="/planner.html">Trip Planner</a>
+  </nav>
+  <button class="btn" onclick="openLogin()">Login</button>
+</header>
+
+<main>
+<section class="section">
+  <div class="section-title">
+    <div><span class="eyebrow">DINE</span><h2>Local Restaurants</h2></div>
+  </div>
+  <div id="restaurantGrid" class="grid">Loading...</div>
+</section>
+</main>
+
+<script src="common.js"></script>
+<script>
+  function openMaps(lat,lng){ window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank"); }
+
+  async function loadRestaurants() {
+    try {
+      const restaurants = await api("/api/restaurants");
+      document.getElementById("restaurantGrid").innerHTML = restaurants.map(r => `
+        <article class="card">
+          <div class="card-top" style="height:100px;"><h3>${r.name}</h3></div>
+          <div class="card-body">
+            <div class="muted">${r.location} • ${r.cuisine}</div>
+            <p>⭐ ${r.rating} | ₹${r.price_range}</p>
+            <p>Hours: ${r.opening_hours}</p>
+            <div class="actions">
+              <button class="primary" onclick="openMaps(${r.latitude},${r.longitude})">🗺️ Open Maps</button>
+            </div>
+          </div>
+        </article>`).join("");
+    } catch(e) {
+      document.getElementById("restaurantGrid").innerHTML = `<p>Error loading restaurants.</p>`;
+    }
+  }
+
+  loadRestaurants();
+</script>
+</body>
+</html>

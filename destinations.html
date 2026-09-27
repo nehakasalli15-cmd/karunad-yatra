@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Destinations | Karunad Yatra</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">KY</div>
+    <div><strong>Karunad Yatra</strong><small>Explore Karnataka</small></div>
+  </div>
+  <nav>
+    <a href="/index.html">Home</a>
+    <a href="/destinations.html">Destinations</a>
+    <a href="/planner.html">Trip Planner</a>
+  </nav>
+  <button class="btn" onclick="openLogin()">Login</button>
+</header>
+
+<main>
+<section class="quick">
+  <button onclick="filterCategory('all')">🌍 All</button>
+  <button onclick="filterCategory('Heritage')">🏛️ Heritage</button>
+  <button onclick="filterCategory('Hill Station')">⛰️ Hills</button>
+  <button onclick="filterCategory('Beaches')">🏖️ Coastal</button>
+  <button onclick="filterCategory('Waterfalls')">🌿 Waterfalls</button>
+  <button onclick="filterCategory('Wildlife')">🐘 Wildlife</button>
+  <button onclick="filterCategory('Spiritual')">🛕 Spiritual</button>
+</section>
+
+<section class="section">
+  <div class="section-title">
+    <div><span class="eyebrow">EXPLORE</span><h2>Tourist Destinations</h2></div>
+    <span id="resultCount"></span>
+  </div>
+  <div id="placeGrid" class="grid"></div>
+</section>
+</main>
+
+<script src="js/common.js"></script>
+<script>
+  let places = [];
+
+  async function loadPlaces(category="all") {
+    const urlParams = new URLSearchParams(window.location.search);
+    const q = urlParams.get('q') || "";
+    let url = `/api/places?category=${encodeURIComponent(category)}`;
+    if (q) url = `/api/search?q=${encodeURIComponent(q)}`;
+
+    const data = await api(url);
+    places = q ? data.places : data;
+    renderPlaces();
+  }
+
+  function filterCategory(category) {
+    loadPlaces(category);
+  }
+
+  function renderPlaces() {
+    document.getElementById("resultCount").textContent = `${places.length} destinations`;
+    document.getElementById("placeGrid").innerHTML = places.map(p => `
+      <article class="card">
+        <div class="card-top"><h3>${p.name}</h3></div>
+        <div class="card-body">
+          <div class="muted">${p.district} • ${p.category}</div>
+          <p>${p.description || p.culture || ""}</p>
+          <div class="actions">
+            <button class="primary" onclick="window.location.href='/place.html?id=${p.id}'">Explore</button>
+          </div>
+        </div>
+      </article>`).join("");
+  }
+
+  loadPlaces();
+</script>
+</body>
+</html>

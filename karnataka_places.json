@@ -1,0 +1,83 @@
+[
+  {
+    "place_id": "KA_01",
+    "name": "Hampi",
+    "district": "Vijayanagara",
+    "category": "Heritage",
+    "culture": "Historic capital of the Vijayanagara Empire and a UNESCO World Heritage destination.",
+    "famous_for": [
+      "Virupaksha Temple",
+      "Vijaya Vittala Temple",
+      "Stone Chariot",
+      "Lotus Mahal"
+    ],
+    "best_time": "October to February",
+    "activities": [
+      "Heritage sightseeing",
+      "Photography",
+      "Cycling",
+      "Historical exploration"
+    ],
+    "food": [
+      "Jolada Rotti",
+      "Ennegayi",
+      "North Karnataka cuisine"
+    ],
+    "latitude": 15.335,
+    "longitude": 76.46
+  },
+  {
+    "place_id": "KA_02",
+    "name": "Mysuru",
+    "district": "Mysuru",
+    "category": "Heritage",
+    "culture": "Cultural capital of Karnataka known for royal heritage, palaces, festivals and traditional arts.",
+    "famous_for": [
+      "Mysuru Palace",
+      "Chamundi Hills",
+      "Mysuru Zoo",
+      "Devaraja Market"
+    ],
+    "best_time": "October to February",
+    "activities": [
+      "Palace visit",
+      "Shopping",
+      "Cultural sightseeing",
+      "Photography"
+    ],
+    "food": [
+      "Mysuru Pak",
+      "Mysuru Masala Dosa",
+      "Mysuru Churumuri"
+    ],
+    "latitude": 12.2958,
+    "longitude": 76.6394
+  },
+  {
+    "place_id": "KA_03",
+    "name": "Coorg",
+    "district": "Kodagu",
+    "category": "Hill Station",
+    "culture": "Known for Kodava culture, coffee plantations, forests and scenic Western Ghats landscapes.",
+    "famous_for": [
+      "Abbey Falls",
+      "Raja's Seat",
+      "Dubare",
+      "Talacauvery"
+    ],
+    "best_time": "October to March",
+    "activities": [
+      "Trekking",
+      "Nature walks",
+      "Coffee plantation visits",
+      "Photography"
+    ],
+    "food": [
+      "Pandi Curry",
+      "Kadambuttu",
+      "Coorg coffee"
+    ],
+    "latitude": 12.3375,
+    "longitude": 75.8069
+  }
+]

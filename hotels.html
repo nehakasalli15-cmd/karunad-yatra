@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotels | Karunad Yatra</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">KY</div>
+    <div><strong>Karunad Yatra</strong><small>Explore Karnataka</small></div>
+  </div>
+  <nav>
+    <a href="/index.html">Home</a>
+    <a href="/destinations.html">Destinations</a>
+    <a href="/hotels.html">Hotels</a>
+    <a href="/restaurants.html">Restaurants</a>
+    <a href="/planner.html">Trip Planner</a>
+  </nav>
+  <button class="btn" onclick="openLogin()">Login</button>
+</header>
+
+<main>
+<section class="section">
+  <div class="section-title">
+    <div><span class="eyebrow">STAY</span><h2>Top Hotels & Resorts</h2></div>
+  </div>
+  <div id="hotelGrid" class="grid">Loading...</div>
+</section>
+</main>
+
+<script src="common.js"></script>
+<script>
+  function openMaps(lat,lng){ window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank"); }
+
+  async function loadHotels() {
+    try {
+      const hotels = await api("/api/hotels");
+      document.getElementById("hotelGrid").innerHTML = hotels.map(h => `
+        <article class="card">
+          <div class="card-top" style="height:100px;"><h3>${h.name}</h3></div>
+          <div class="card-body">
+            <div class="muted">${h.location} • ${h.hotel_type}</div>
+            <p>⭐ ${h.rating} | ₹${h.price_range}</p>
+            <div class="tags"><span class="tag">${(h.facilities||"").split(',').slice(0,3).join('</span><span class="tag">')}</span></div>
+            <div class="actions">
+              <button class="primary" onclick="openMaps(${h.latitude},${h.longitude})">🗺️ Open Maps</button>
+            </div>
+          </div>
+        </article>`).join("");
+    } catch(e) {
+      document.getElementById("hotelGrid").innerHTML = `<p>Error loading hotels.</p>`;
+    }
+  }
+
+  loadHotels();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "karunad-yatra",
+  "version": "1.0.0",
+  "description": "Karnataka tourism frontend + Express backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^18.0.4",
+    "express": "^5.1.0",
+    "mysql2": "^3.24.4"
+  }
+}
